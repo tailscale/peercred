@@ -39,7 +39,7 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 			unix.SO_PEERCRED)
 	})
 	if cerr != nil {
-		return nil, fmt.Errorf("raw.Control: %w", err)
+		return nil, fmt.Errorf("raw.Control: %w", cerr)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("unix.GetsockoptUcred: %w", err)
