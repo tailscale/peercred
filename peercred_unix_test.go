@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // +build go1.15
-// +build linux
+// +build linux darwin
 
 package peercred // import "inet.af/peercred"
 
@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-func TestUnix(t *testing.T) {
+func TestUnixSock(t *testing.T) {
 	d := t.TempDir()
 	path := filepath.Join(d, "foo.sock")
 	sock, err := net.Listen("unix", path)
@@ -24,14 +24,21 @@ func TestUnix(t *testing.T) {
 	}
 	defer sock.Close()
 
+	clientConnCh := make(chan net.Conn, 1)
 	go func() {
+		defer close(clientConnCh)
 		c, err := net.Dial("unix", path)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		c.Close()
+		clientConnCh <- c
 	}()
+	clientConn, ok := <-clientConnCh
+	if !ok {
+		return
+	}
+	defer clientConn.Close()
 
 	c, err := sock.Accept()
 	if err != nil {
