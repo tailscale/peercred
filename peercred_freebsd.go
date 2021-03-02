@@ -21,7 +21,7 @@ func getFreeBSD(c net.Conn) (*Creds, error) {
 	case *net.UnixConn:
 		return getUnix(c)
 	case *net.TCPConn:
-		// TODO: use /proc tcp info for localhost connections like Windows?
+		// TODO: use sysctl net.inet.tcp.pcblist for localhost connections like Windows?
 	}
 	return nil, ErrUnsupportedConnType
 }
