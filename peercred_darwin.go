@@ -13,10 +13,10 @@ import (
 )
 
 func init() {
-	osGet = getLinux
+	osGet = getDarwin
 }
 
-func getLinux(c net.Conn) (*Creds, error) {
+func getDarwin(c net.Conn) (*Creds, error) {
 	switch c := c.(type) {
 	case *net.UnixConn:
 		return getUnix(c)
