@@ -13,15 +13,15 @@ import (
 )
 
 func init() {
-	osGet = getDarwin
+	osGet = getFreeBSD
 }
 
-func getDarwin(c net.Conn) (*Creds, error) {
+func getFreeBSD(c net.Conn) (*Creds, error) {
 	switch c := c.(type) {
 	case *net.UnixConn:
 		return getUnix(c)
 	case *net.TCPConn:
-		// TODO: use /proc tcp info for localhost connections like Windows?
+		// TODO: use sysctl net.inet.tcp.pcblist for localhost connections like Windows?
 	}
 	return nil, ErrUnsupportedConnType
 }
@@ -33,7 +33,6 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 	}
 
 	var cred *unix.Xucred
-	var pid int
 	cerr := raw.Control(func(fd uintptr) {
 		cred, err = unix.GetsockoptXucred(int(fd),
 			unix.SOL_LOCAL,
@@ -41,12 +40,6 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 		if err != nil {
 			err = fmt.Errorf("unix.GetsockoptXucred: %w", err)
 			return
-		}
-		pid, err = unix.GetsockoptInt(int(fd),
-			unix.SOL_LOCAL,
-			unix.LOCAL_PEERPID)
-		if err != nil {
-			err = fmt.Errorf("unix.GetsockoptInt: %w", err)
 		}
 	})
 	if cerr != nil {
@@ -56,7 +49,7 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 		return nil, err
 	}
 	return &Creds{
-		pid: pid,
+		pid: 0, // FreeBSD 13 adds a cr_pid field, can be used here.
 		uid: strconv.FormatUint(uint64(cred.Uid), 10),
 	}, nil
 }

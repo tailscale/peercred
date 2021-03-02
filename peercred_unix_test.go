@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // +build go1.15
-// +build linux darwin
+// +build linux darwin freebsd
 
 package peercred // import "inet.af/peercred"
 
@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -59,11 +60,16 @@ func TestUnixSock(t *testing.T) {
 		t.Errorf("UID = %q; want %q", got, want)
 	}
 	pid, ok := creds.PID()
-	if !ok {
-		t.Errorf("no PID")
+	if runtime.GOOS == "freebsd" {
+		if ok {
+			t.Error("PID ok; want !ok. Thank you for fixing FreeBSD, please update the test.")
+		}
+	} else {
+		if !ok {
+			t.Errorf("no PID")
+		}
+		if got, want := pid, os.Getpid(); got != want {
+			t.Errorf("PID = %v; want %v", got, want)
+		}
 	}
-	if got, want := pid, os.Getpid(); got != want {
-		t.Errorf("PID = %v; want %v", got, want)
-	}
-
 }
