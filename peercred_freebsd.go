@@ -43,7 +43,7 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 		}
 	})
 	if cerr != nil {
-		return nil, fmt.Errorf("raw.Control: %w", err)
+		return nil, fmt.Errorf("raw.Control: %w", cerr)
 	}
 	if err != nil {
 		return nil, err
