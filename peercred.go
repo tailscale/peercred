@@ -14,8 +14,9 @@ import (
 
 // Creds are the peer credentials.
 type Creds struct {
-	pid int
-	uid string
+	pid  int
+	uid  string
+	gids []string
 }
 
 func (c *Creds) PID() (pid int, ok bool) {
@@ -27,6 +28,12 @@ func (c *Creds) PID() (pid int, ok bool) {
 // The returned string is suitable to passing to os/user.LookupId.
 func (c *Creds) UserID() (uid string, ok bool) {
 	return c.uid, c.uid != ""
+}
+
+// GroupIDs returns the group IDs for the user that owns the other side of the
+// connection, if known. (ok is false if not known)
+func (c *Creds) GroupIDs() (groups []string, ok bool) {
+	return c.gids, len(c.gids) > 0
 }
 
 var osGet func(net.Conn) (*Creds, error)

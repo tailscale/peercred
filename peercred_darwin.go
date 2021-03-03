@@ -55,8 +55,14 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Creds{
+	creds := &Creds{
 		pid: pid,
 		uid: strconv.FormatUint(uint64(cred.Uid), 10),
-	}, nil
+	}
+	if cred.Ngroups > 0 {
+		for _, gid := range cred.Groups[:] {
+			creds.gids = append(creds.gids, strconv.FormatUint(uint64(gid), 10))
+		}
+	}
+	return creds, nil
 }

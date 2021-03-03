@@ -11,8 +11,11 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/user"
 	"path/filepath"
+	"reflect"
 	"runtime"
+	"sort"
 	"testing"
 )
 
@@ -59,6 +62,27 @@ func TestUnixSock(t *testing.T) {
 	if got, want := uid, fmt.Sprint(os.Getuid()); got != want {
 		t.Errorf("UID = %q; want %q", got, want)
 	}
+
+	gids, ok := creds.GroupIDs()
+	if !ok {
+		t.Errorf("no GIDs")
+	}
+	sort.Strings(gids)
+
+	u, err := user.LookupId(fmt.Sprint(os.Getuid()))
+	if err != nil {
+		t.Fatalf("LookupId: %v", err)
+	}
+	wantGids, err := u.GroupIds()
+	if err != nil {
+		t.Fatalf("GroupIds: %v", err)
+	}
+	sort.Strings(wantGids)
+
+	if !reflect.DeepEqual(gids, wantGids) {
+		t.Errorf("GIDs = %q; want %q", gids, wantGids)
+	}
+
 	pid, ok := creds.PID()
 	if runtime.GOOS == "freebsd" {
 		if ok {

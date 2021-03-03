@@ -7,6 +7,7 @@ package peercred
 import (
 	"fmt"
 	"net"
+	"os/user"
 	"strconv"
 
 	"golang.org/x/sys/unix"
@@ -44,8 +45,20 @@ func getUnix(c *net.UnixConn) (*Creds, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unix.GetsockoptUcred: %w", err)
 	}
-	return &Creds{
+	creds := &Creds{
 		pid: int(cred.Pid),
 		uid: strconv.FormatUint(uint64(cred.Uid), 10),
-	}, nil
+	}
+
+	u, err := user.LookupId(creds.uid)
+	if err != nil {
+		return nil, err
+	}
+
+	creds.gids, err = u.GroupIds()
+	if err != nil {
+		return nil, err
+	}
+
+	return creds, nil
 }
