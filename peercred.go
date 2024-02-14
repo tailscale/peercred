@@ -4,7 +4,7 @@
 
 // Package peercred maps from a net.Conn to information about the
 // other side of the connection, using various OS-specific facilities.
-package peercred // import "inet.af/peercred"
+package peercred
 
 import (
 	"errors"

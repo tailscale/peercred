@@ -3,10 +3,8 @@
 // license that can be found in the LICENSE file.
 
 //go:build go1.15 && (linux || darwin || freebsd)
-// +build go1.15
-// +build linux darwin freebsd
 
-package peercred // import "inet.af/peercred"
+package peercred
 
 import (
 	"fmt"
